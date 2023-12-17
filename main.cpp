@@ -2,13 +2,12 @@
 #include <array> 
 #include <cctype>
 #include <cstdlib>
-#include <ctime>
-#include <iomanip> 
+
 
 using namespace std;
 
-const char PLAYER1 = 'x';
-const char PLAYER2 = 'o';
+const char PLAYER1 = 'X';
+const char PLAYER2 = 'O';
 
 char board[6][7];
 
@@ -19,52 +18,85 @@ int checkFreeSpaces();
 char checkWinner();
 void printWinner(char);
 void placeChecker(char player);
+void aiMove();
 
 
 int main() {
 	char winner;
 	char playAgain = ' ';
+	char menuOption;
 
 	do {
 		winner = ' ';
+
 		resetBoard();
+		displayMainMenu();
 
-		while (winner == ' ' && checkFreeSpaces() != 0) {
+		cout << "\nPilih:\n-> ";
+		cin >> menuOption;
 
-			system("cls");
-			displayBoard();
+		switch (menuOption) {
+			case '1': // Player vs Player
+				while (winner == ' ' && checkFreeSpaces() != 0) {
 
-			placeChecker(PLAYER1);
-			if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
-				winner = PLAYER1;
+					system("cls");
+					displayBoard();
+
+					placeChecker(PLAYER1);
+					if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
+						winner = PLAYER1;
+						break;
+					}
+
+					system("cls");
+					displayBoard();
+
+					placeChecker(PLAYER2);
+					if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
+						winner = PLAYER2;
+						break;
+					}
+				}
 				break;
-			}
 
-			system("cls");
-			displayBoard();
+			case '2': // Player vs Bot
 
-			placeChecker(PLAYER2);
-			if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
-				winner = PLAYER2;
 				break;
-			}
+
+			case '3': // Keluar
+
+				return 0;
 		}
-
+		
 		system("cls");
 		displayBoard();
 		printWinner(winner);
 
 		cout << "\n\tPlay again? (y/n):";
 		cin >> playAgain;
+
+		system("cls");
 		
 	} while (playAgain == 'Y' || playAgain == 'y');
 	
-	cout << "\n\tTerima kasih sudah bermain Connect 4!\n";
-	
+	cout << "\nTerima kasih sudah bermain Connect 4!\n";
+
 	return 0;
 }
 
 void displayMainMenu() {
+	cout << "  _____                            _     ______               \n";
+	cout << " / ____|                          | |   |  ____|              \n";
+	cout << "| |     ___  _ __  _ __   ___  ___| |_  | |__ ___  _   _ _ __ \n";
+	cout << "| |    / _ \\| '_ \\| '_ \\ / _ \\/ __| __| |  __/ _ \\| | | | '__|\n";
+	cout << "| |___| (_) | | | | | | |  __/ (__| |_  | | | (_) | |_| | |   \n";
+	cout << " \\_____\\___/|_| |_|_| |_|\\___|\\___|\\__| |_|  \\___/ \\__,_|_|   \n";
+	cout << "                                                               \n";
+	cout << "                                                              \n";
+
+	cout << "1. Player VS Player \n";
+	cout << "\n2. Player VS Bot\n";
+	cout << "\n3. Keluar\n";
 }
 
 void resetBoard() {
@@ -86,7 +118,6 @@ void displayBoard() {
 	cout << " \\_____\\___/|_| |_|_| |_|\\___|\\___|\\__| |_|  \\___/ \\__,_|_|   \n";
 	cout << "                                                               \n";
 	cout << "                                                              \n";
-	// gila	
 
 	cout << "\t      " << board[0][0] << " | " << board[0][1] << " | " << board[0][2] << " | " << board[0][3] << " | " << board[0][4] << " | " << board[0][5] << " | " << board[0][6] << " ";
 	cout << "\n\t     ---|---|---|---|---|---|---\n";
@@ -122,15 +153,14 @@ void placeChecker(char player) {
 	int colPlacement;
 
 	switch (player) {
-		case 'x':
+		case 'X':
 			cout << "\n    --> PLAYER 1'S TURN (X) <--        PLAYER 2\n\n";
 			break;
-		case 'o':
+		case 'O':
 			cout << "\n        PLAYER 1                   --> PLAYER 2'S TURN (O) <--\n\n";
 			break;
 	}
 
-	// 
 	do {
 		int rowPlacement = 5;
 
@@ -166,6 +196,11 @@ void placeChecker(char player) {
 
 	} while (true);
 
+}
+
+void aiMove() {
+
+	
 }
 
 char checkWinner() {
