@@ -19,13 +19,6 @@ int checkFreeSpaces();
 char checkWinner();
 void printWinner(char);
 void placeChecker(char player);
-void aiMove();
-int minimax(int depth, bool isMaximizing);
-bool isValidMove(int col);
-int dropPiece(int col);
-void undoMove(int col);
-int evaluateBoard();
-void placeCheckerAI(char player, int col);
 void computerMove();
 
 
