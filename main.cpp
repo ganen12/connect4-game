@@ -1,14 +1,15 @@
 #include <iostream>
 #include <array> 
 #include <cctype>
-#include <cstdlib>
+#include <ctime>
+#include <limits>
 
 
 using namespace std;
 
 const char PLAYER1 = 'X';
 const char PLAYER2 = 'O';
-
+const char AI = 'O';
 char board[6][7];
 
 void displayMainMenu();
@@ -19,6 +20,14 @@ char checkWinner();
 void printWinner(char);
 void placeChecker(char player);
 void aiMove();
+int minimax(int depth, bool isMaximizing);
+bool isValidMove(int col);
+int dropPiece(int col);
+void undoMove(int col);
+int evaluateBoard();
+void placeCheckerAI(char player, int col);
+void computerMove();
+
 
 
 int main() {
@@ -36,38 +45,57 @@ int main() {
 		cin >> menuOption;
 
 		switch (menuOption) {
-			case '1': // Player vs Player
-				while (winner == ' ' && checkFreeSpaces() != 0) {
+		case '1': // Player vs Player
+			while (winner == ' ' && checkFreeSpaces() != 0) {
 
-					system("cls");
-					displayBoard();
+				system("cls");
+				displayBoard();
 
-					placeChecker(PLAYER1);
-					if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
-						winner = PLAYER1;
-						break;
-					}
-
-					system("cls");
-					displayBoard();
-
-					placeChecker(PLAYER2);
-					if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
-						winner = PLAYER2;
-						break;
-					}
+				placeChecker(PLAYER1);
+				if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
+					winner = PLAYER1;
+					break;
 				}
-				break;
 
-			case '2': // Player vs Bot
+				system("cls");
+				displayBoard();
 
-				break;
+				placeChecker(PLAYER2);
+				if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
+					winner = PLAYER2;
+					break;
+				}
+			}
+			break;
 
-			case '3': // Keluar
+		case '2': // Player vs Bot
+			while (winner == ' ' && checkFreeSpaces() != 0) {
 
-				return 0;
+				system("cls");
+				displayBoard();
+
+				placeChecker(PLAYER1);
+				if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
+					winner = PLAYER1;
+					break;
+				}
+
+				system("cls");
+				displayBoard();
+
+				computerMove();
+				if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
+					winner = PLAYER2;
+					break;
+				}
+			}
+
+			break;
+		case '3': // Keluar
+
+			return 0;
 		}
-		
+
 		system("cls");
 		displayBoard();
 		printWinner(winner);
@@ -76,9 +104,9 @@ int main() {
 		cin >> playAgain;
 
 		system("cls");
-		
+
 	} while (playAgain == 'Y' || playAgain == 'y');
-	
+
 	cout << "\nTerima kasih sudah bermain Connect 4!\n";
 
 	return 0;
@@ -150,25 +178,24 @@ int checkFreeSpaces() {
 
 void placeChecker(char player) {
 
-	int colPlacement;
+	int col;
 
 	switch (player) {
-		case 'X':
-			cout << "\n    --> PLAYER 1'S TURN (X) <--        PLAYER 2\n\n";
-			break;
-		case 'O':
-			cout << "\n        PLAYER 1                   --> PLAYER 2'S TURN (O) <--\n\n";
-			break;
+	case 'X':
+		cout << "\n    --> PLAYER 1'S TURN (X) <--        PLAYER 2\n\n";
+		break;
+	case 'O':
+		cout << "\n        PLAYER 1                   --> PLAYER 2'S TURN (O) <--\n\n";
+		break;
 	}
 
 	do {
-		int rowPlacement = 5;
 
 		// Validasi input
 		while (true) {
 			cout << "\tPilih kolom (1-7):\n\t-> ";
-			cin >> colPlacement;
-			if (colPlacement >= 1 && colPlacement <= 7) {
+			cin >> col;
+			if (col >= 1 && col <= 7) {
 				break; // Valid input, exit loop
 			}
 			else {
@@ -178,18 +205,17 @@ void placeChecker(char player) {
 			}
 		}
 
-		while (rowPlacement >= 0) {
-			if (board[rowPlacement][colPlacement - 1] != ' ') {
-				rowPlacement--;
-			}
-			else if (board[rowPlacement][colPlacement - 1] == ' ') {
-				board[rowPlacement][colPlacement - 1] = player;
-				break;
-			}
-		}
+		// Meletakkan checker
+		int row = 5;
 
-		if (board[rowPlacement][colPlacement - 1] == player) {
-			break;
+		while (row >= 0) {
+			if (board[row][col - 1] != ' ') {
+				row--;
+			}
+			else if (board[row][col - 1] == ' ') {
+				board[row][col - 1] = player;
+				return;
+			}
 		}
 
 		cout << "\n\tTidak ada lagi ruang yang tersedia, coba kolom lain!" << endl;
@@ -198,9 +224,67 @@ void placeChecker(char player) {
 
 }
 
-void aiMove() {
+void computerMove() {
+	srand(static_cast<unsigned int>(time(0)));
 
-	
+	int randomCol;
+	int row;
+
+	// Cek jika ada move yang bisa memenangkan AI
+	// Bisa dibilang, AI akan mengecek jika ada 'O' yang sudah 3x berurutan
+	for (int col = 0; col < 7; ++col) {
+
+		row = 5;
+
+		while (row >= 0) {
+			if (board[row][col] == ' ') {
+				board[row][col] = AI;
+				if (checkWinner() == AI) {
+					return;  // AI wins, no need to continue
+				}
+				board[row][col] = ' ';  // Undo move if it doesn't lead to a win
+				break;
+			}
+			else if (board[row][col] != ' ') {
+				row--;
+			}
+		}
+	}
+	// Cek jika ada move untuk bisa mem-blok lawan agar lawan tidak menang
+	// Bisa dibilang, AI akan mengecek jika ada 'X' yang sudah 3x berurutan
+	for (int col = 0; col < 7; ++col) {
+
+		row = 5;
+
+		while (row >= 0) {
+			if (board[row][col] == ' ') {
+				board[row][col] = PLAYER1;  // Assume it's the opponent's move
+				if (checkWinner() == PLAYER1) {
+					board[row][col] = AI;  // Block the opponent's winning move
+					return;
+				}
+				board[row][col] = ' ';  // Undo move if it doesn't block the opponent's win
+				break;
+			}
+			else if (board[row][col] != ' ') {
+				row--;
+			}
+		}
+	}
+
+	// If no winning move or block is found, make a random move
+	do {
+		randomCol = rand() % 7 + 1;
+		row = 5;
+
+		while (row >= 0) {
+			if (board[row][randomCol - 1] == ' ') {
+				board[row][randomCol - 1] = AI;
+				return;
+			}
+			row--;
+		}
+	} while (true);
 }
 
 char checkWinner() {
