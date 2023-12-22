@@ -2,8 +2,7 @@
 #include <array> 
 #include <cctype>
 #include <ctime>
-#include <limits>
-
+#include <Windows.h>
 
 using namespace std;
 
@@ -19,6 +18,13 @@ int checkFreeSpaces();
 char checkWinner();
 void printWinner(char);
 void placeChecker(char player);
+void aiMove();
+int minimax(int depth, bool isMaximizing);
+bool isValidMove(int col);
+int dropPiece(int col);
+void undoMove(int col);
+int evaluateBoard();
+void placeCheckerAI(char player, int col);
 void computerMove();
 
 
@@ -39,13 +45,13 @@ int main() {
 
 		switch (menuOption) {
 		case '1': // Player vs Player
-			while (winner == ' ' && checkFreeSpaces() != 0) {
+			while (winner == ' ' && checkFreeSpaces() != 0) { // winner == ' ' mungkin akan dihapus, supaya hasil permainan seri bisa ditampilkan
 
 				system("cls");
 				displayBoard();
 
 				placeChecker(PLAYER1);
-				if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
+				if (checkWinner() != ' ') {
 					winner = PLAYER1;
 					break;
 				}
@@ -54,7 +60,7 @@ int main() {
 				displayBoard();
 
 				placeChecker(PLAYER2);
-				if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
+				if (checkWinner() != ' ') {
 					winner = PLAYER2;
 					break;
 				}
@@ -76,6 +82,7 @@ int main() {
 				system("cls");
 				displayBoard();
 
+				Sleep(100);
 				computerMove();
 				if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
 					winner = PLAYER2;
@@ -172,14 +179,15 @@ int checkFreeSpaces() {
 void placeChecker(char player) {
 
 	int col;
+	int row;
 
 	switch (player) {
-	case 'X':
-		cout << "\n    --> PLAYER 1'S TURN (X) <--        PLAYER 2\n\n";
-		break;
-	case 'O':
-		cout << "\n        PLAYER 1                   --> PLAYER 2'S TURN (O) <--\n\n";
-		break;
+		case 'X':
+			cout << "\n    --> PLAYER 1'S TURN (X) <--         \n\n";
+			break;
+		case 'O':
+			cout << "\n                             --> PLAYER 2'S TURN (O) <--\n\n";
+			break;
 	}
 
 	do {
@@ -194,12 +202,13 @@ void placeChecker(char player) {
 			else {
 				cout << "\n\tInvalid input. Masukkan angka 1-7.\n";
 				cin.clear(); // Clear error flag
-				cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear input buffer
+				cin.ignore();
+				// cin.ignore(numeric_limits<streamsize>::max(), '\n');  Clear input buffer
 			}
 		}
 
 		// Meletakkan checker
-		int row = 5;
+		row = 5;
 
 		while (row >= 0) {
 			if (board[row][col - 1] != ' ') {
@@ -217,13 +226,14 @@ void placeChecker(char player) {
 
 }
 
+// move AI demgam menggunakan algoritma simple
 void computerMove() {
 	srand(static_cast<unsigned int>(time(0)));
 
 	int randomCol;
 	int row;
 
-	// Cek jika ada move yang bisa memenangkan AI
+	// Cek jika ada move yang bisa memenangkan AI, jika ada maka letakkan checker di kotak yang terpilih
 	// Bisa dibilang, AI akan mengecek jika ada 'O' yang sudah 3x berurutan
 	for (int col = 0; col < 7; ++col) {
 
@@ -233,9 +243,9 @@ void computerMove() {
 			if (board[row][col] == ' ') {
 				board[row][col] = AI;
 				if (checkWinner() == AI) {
-					return;  // AI wins, no need to continue
+					return;  // AI menang, tidak perlu lanjut
 				}
-				board[row][col] = ' ';  // Undo move if it doesn't lead to a win
+				board[row][col] = ' ';  // Move akan di-undo jika move tersebut tidak memenangkan AI
 				break;
 			}
 			else if (board[row][col] != ' ') {
@@ -251,12 +261,12 @@ void computerMove() {
 
 		while (row >= 0) {
 			if (board[row][col] == ' ') {
-				board[row][col] = PLAYER1;  // Assume it's the opponent's move
+				board[row][col] = PLAYER1;  // Anggap bahwa kotak yang ini diisi lawan
 				if (checkWinner() == PLAYER1) {
-					board[row][col] = AI;  // Block the opponent's winning move
+					board[row][col] = AI;  // Mem-blok move yang memenangkan lawan
 					return;
 				}
-				board[row][col] = ' ';  // Undo move if it doesn't block the opponent's win
+				board[row][col] = ' ';  // Move akan di-undo jika tidak memblok lawan
 				break;
 			}
 			else if (board[row][col] != ' ') {
@@ -264,8 +274,7 @@ void computerMove() {
 			}
 		}
 	}
-
-	// If no winning move or block is found, make a random move
+	// Jika tidak ada dari kedua move di atas yang ditemukan, maka buat random move dari kolom 1-7
 	do {
 		randomCol = rand() % 7 + 1;
 		row = 5;
