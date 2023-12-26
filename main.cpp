@@ -18,13 +18,6 @@ int checkFreeSpaces();
 char checkWinner();
 void printWinner(char);
 void placeChecker(char player);
-void aiMove();
-int minimax(int depth, bool isMaximizing);
-bool isValidMove(int col);
-int dropPiece(int col);
-void undoMove(int col);
-int evaluateBoard();
-void placeCheckerAI(char player, int col);
 void computerMove();
 
 
@@ -45,7 +38,7 @@ int main() {
 
 		switch (menuOption) {
 		case '1': // Player vs Player
-			while (winner == ' ' && checkFreeSpaces() != 0) { // winner == ' ' mungkin akan dihapus, supaya hasil permainan seri bisa ditampilkan
+			while (winner == ' ' && checkFreeSpaces() != 0) { // winner == ' ' akan dihapus, supaya hasil permainan seri bisa ditampilkan
 
 				system("cls");
 				displayBoard();
@@ -74,7 +67,7 @@ int main() {
 				displayBoard();
 
 				placeChecker(PLAYER1);
-				if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
+				if (checkWinner() != ' ') {
 					winner = PLAYER1;
 					break;
 				}
@@ -84,7 +77,7 @@ int main() {
 
 				Sleep(100);
 				computerMove();
-				if (checkWinner() != ' ' || checkFreeSpaces() == 0) {
+				if (checkWinner() != ' ') {
 					winner = PLAYER2;
 					break;
 				}
