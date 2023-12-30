@@ -75,7 +75,7 @@ int main() {
 				system("cls");
 				displayBoard();
 
-				Sleep(100);
+				Sleep(200);
 				computerMove();
 				if (checkWinner() != ' ') {
 					winner = PLAYER2;
