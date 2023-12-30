@@ -18,7 +18,7 @@ void displayBoard();
 int checkFreeSpaces();
 char checkWinner();
 void printWinner(char);
-void placeChecker(char player);
+void playerMove(char player);
 void computerMove();
 
 
@@ -43,7 +43,7 @@ int main() {
 				system("cls");
 				displayBoard();
 					
-				placeChecker(PLAYER1);
+				playerMove(PLAYER1);
 				if (checkWinner() != ' ') {
 					winner = PLAYER1;
 					break;
@@ -52,7 +52,7 @@ int main() {
 				system("cls");
 				displayBoard();
 
-				placeChecker(PLAYER2);
+				playerMove(PLAYER2);
 				if (checkWinner() != ' ') {
 					winner = PLAYER2;
 					break;
@@ -66,7 +66,7 @@ int main() {
 				system("cls");
 				displayBoard();
 
-				placeChecker(PLAYER1);
+				playerMove(PLAYER1);
 				if (checkWinner() != ' ') {
 					winner = PLAYER1;
 					break;
@@ -78,13 +78,13 @@ int main() {
 				Sleep(200);
 				computerMove();
 				if (checkWinner() != ' ') {
-					winner = PLAYER2;
+					winner = AI;
 					break;
 				}
 			}
 
 			break;
-		case '3': // Keluar
+		default: // Keluar
 
 			return 0;
 		}
@@ -166,10 +166,9 @@ int checkFreeSpaces() {
 	return freeSpaces;
 }
 
-void placeChecker(char player) {
+void playerMove(char player) {
 
 	int col;
-	int row;
 
 	switch (player) {
 		case 'X':
@@ -198,13 +197,8 @@ void placeChecker(char player) {
 		}
 
 		// Meletakkan checker
-		row = 5;
-
-		while (row >= 0) {
-			if (board[row][col - 1] != ' ') {
-				row--;
-			}
-			else {
+		for (int row = 5; row >= 0; --row) {
+			if (board[row][col - 1] == ' ') {
 				board[row][col - 1] = player;
 				return;
 			}
@@ -216,20 +210,15 @@ void placeChecker(char player) {
 
 }
 
-// move AI demgam menggunakan algoritma simple
+// move AI menggunakan algoritma simple
 void computerMove() {
 	srand(static_cast<unsigned int>(time(0)));
 
 	int randomCol;
-	int row;
 
 	// Cek jika ada move yang bisa memenangkan AI, jika ada maka letakkan checker di kotak yang terpilih
-
 	for (int col = 0; col < 7; ++col) {
-
-		row = 5;
-
-		while (row >= 0) {
+		for (int row = 5; row >= 0; --row) {
 			if (board[row][col] == ' ') {
 				board[row][col] = AI;
 				if (checkWinner() == AI) {
@@ -238,18 +227,12 @@ void computerMove() {
 				board[row][col] = ' ';  // Move akan di-undo jika move tersebut tidak memenangkan AI
 				break;
 			}
-			else {
-				row--;
-			}
 		}
 	}
+
 	// Cek jika ada move untuk bisa mem-blok lawan agar lawan tidak menang
-
 	for (int col = 0; col < 7; ++col) {
-
-		row = 5;
-
-		while (row >= 0) {
+		for (int row = 5; row >= 0; --row) {
 			if (board[row][col] == ' ') {
 				board[row][col] = PLAYER1;  // Anggap bahwa kotak yang ini diisi lawan
 				if (checkWinner() == PLAYER1) {
@@ -259,23 +242,18 @@ void computerMove() {
 				board[row][col] = ' ';  // Move akan di-undo jika tidak memblok lawan
 				break;
 			}
-			else {
-				row--;
-			}
 		}
 	}
 
 	// Jika tidak ada dari kedua move di atas yang ditemukan, maka buat random move dari kolom 1-7
 	while (true) {
 		randomCol = rand() % 7 + 1;
-		row = 5;
 
-		while (row >= 0) {
+		for (int row = 5; row >= 0; --row) {
 			if (board[row][randomCol - 1] == ' ') {
 				board[row][randomCol - 1] = AI;
 				return;
 			}
-			row--;
 		}
 	}
 }
@@ -330,7 +308,7 @@ char checkWinner() {
 		}
 	}
 
-	return ' '; // jika belum ada checker yang 4 kali berurutan, return char kosong
+	return ' '; // jika belum ada yang menang, return char kosong
 }
 
 void printWinner(char winner) {
