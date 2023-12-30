@@ -12,6 +12,7 @@ const char AI = 'O';
 char board[6][7];
 
 void displayMainMenu();
+void displayTitle();
 void resetBoard();
 void displayBoard();
 int checkFreeSpaces();
@@ -21,10 +22,9 @@ void placeChecker(char player);
 void computerMove();
 
 
-
 int main() {
 	char winner;
-	char playAgain = ' ';
+	char playAgain;
 	char menuOption;
 
 	do {
@@ -38,11 +38,11 @@ int main() {
 
 		switch (menuOption) {
 		case '1': // Player vs Player
-			while (winner == ' ' && checkFreeSpaces() != 0) { // winner == ' ' akan dihapus, supaya hasil permainan seri bisa ditampilkan
+			while (winner == ' ' && checkFreeSpaces() != 0) {
 
 				system("cls");
 				displayBoard();
-
+					
 				placeChecker(PLAYER1);
 				if (checkWinner() != ' ') {
 					winner = PLAYER1;
@@ -105,7 +105,8 @@ int main() {
 	return 0;
 }
 
-void displayMainMenu() {
+
+void displayTitle() {
 	cout << "  _____                            _     ______               \n";
 	cout << " / ____|                          | |   |  ____|              \n";
 	cout << "| |     ___  _ __  _ __   ___  ___| |_  | |__ ___  _   _ _ __ \n";
@@ -114,6 +115,10 @@ void displayMainMenu() {
 	cout << " \\_____\\___/|_| |_|_| |_|\\___|\\___|\\__| |_|  \\___/ \\__,_|_|   \n";
 	cout << "                                                               \n";
 	cout << "                                                              \n";
+}
+
+void displayMainMenu() {
+	displayTitle();
 
 	cout << "1. Player VS Player \n";
 	cout << "\n2. Player VS Bot\n";
@@ -130,15 +135,7 @@ void resetBoard() {
 
 void displayBoard() {
 
-	// keren bet jirr
-	cout << "  _____                            _     ______               \n";
-	cout << " / ____|                          | |   |  ____|              \n";
-	cout << "| |     ___  _ __  _ __   ___  ___| |_  | |__ ___  _   _ _ __ \n";
-	cout << "| |    / _ \\| '_ \\| '_ \\ / _ \\/ __| __| |  __/ _ \\| | | | '__|\n";
-	cout << "| |___| (_) | | | | | | |  __/ (__| |_  | | | (_) | |_| | |   \n";
-	cout << " \\_____\\___/|_| |_|_| |_|\\___|\\___|\\__| |_|  \\___/ \\__,_|_|   \n";
-	cout << "                                                               \n";
-	cout << "                                                              \n";
+	displayTitle();
 
 	cout << "\t      " << board[0][0] << " | " << board[0][1] << " | " << board[0][2] << " | " << board[0][3] << " | " << board[0][4] << " | " << board[0][5] << " | " << board[0][6] << " ";
 	cout << "\n\t     ---|---|---|---|---|---|---\n";
@@ -207,7 +204,7 @@ void placeChecker(char player) {
 			if (board[row][col - 1] != ' ') {
 				row--;
 			}
-			else if (board[row][col - 1] == ' ') {
+			else {
 				board[row][col - 1] = player;
 				return;
 			}
@@ -227,7 +224,7 @@ void computerMove() {
 	int row;
 
 	// Cek jika ada move yang bisa memenangkan AI, jika ada maka letakkan checker di kotak yang terpilih
-	// Bisa dibilang, AI akan mengecek jika ada 'O' yang sudah 3x berurutan
+
 	for (int col = 0; col < 7; ++col) {
 
 		row = 5;
@@ -241,13 +238,13 @@ void computerMove() {
 				board[row][col] = ' ';  // Move akan di-undo jika move tersebut tidak memenangkan AI
 				break;
 			}
-			else if (board[row][col] != ' ') {
+			else {
 				row--;
 			}
 		}
 	}
 	// Cek jika ada move untuk bisa mem-blok lawan agar lawan tidak menang
-	// Bisa dibilang, AI akan mengecek jika ada 'X' yang sudah 3x berurutan
+
 	for (int col = 0; col < 7; ++col) {
 
 		row = 5;
@@ -262,13 +259,14 @@ void computerMove() {
 				board[row][col] = ' ';  // Move akan di-undo jika tidak memblok lawan
 				break;
 			}
-			else if (board[row][col] != ' ') {
+			else {
 				row--;
 			}
 		}
 	}
+
 	// Jika tidak ada dari kedua move di atas yang ditemukan, maka buat random move dari kolom 1-7
-	do {
+	while (true) {
 		randomCol = rand() % 7 + 1;
 		row = 5;
 
@@ -279,7 +277,7 @@ void computerMove() {
 			}
 			row--;
 		}
-	} while (true);
+	}
 }
 
 char checkWinner() {
